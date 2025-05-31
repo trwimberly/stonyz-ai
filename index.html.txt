@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stonyz.ai - AI-Powered Stoner Bot</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .header p {
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+            text-align: center;
+        }
+        .welcome {
+            margin-bottom: 30px;
+        }
+        .welcome h2 {
+            color: #059669;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .welcome p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        .auth-form {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            border-color: #10b981;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #047857;
+        }
+        .chat-container {
+            display: none;
+        }
+        .chat-container.active {
+            display: block;
+        }
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+            margin-bottom: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        .message.bot {
+            background: #e0f2fe;
+            color: #0369a1;
+            margin-right: auto;
+        }
+        .message.user {
+            background: #dcfce7;
+            color: #166534;
+            margin-left: auto;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 20px;
+        }
+        .message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            outline: none;
+        }
+        .send-btn {
+            padding: 10px 20px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .feature-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 20px;
+        }
+        .feature-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .joke-btn { background: #fbbf24; color: #92400e; }
+        .horoscope-btn { background: #a855f7; color: #581c87; }
+        .vibe-btn { background: #3b82f6; color: #1e3a8a; }
+        .alert {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        .alert.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            background: transparent;
+        }
+        .tab.active {
+            background: white;
+            color: #059669;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+            }
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 Stonyz.ai</h1>
+            <p>Your AI-Powered Stoner Companion</p>
+        </div>
+        
+        <div class="content">
+            <!-- Auth Section -->
+            <div id="authSection">
+                <div class="welcome">
+                    <h2>Welcome! 🌿</h2>
+                    <p>Sign in or create an account to get personalized stoner vibes</p>
+                </div>
+                
+                <div class="tab-buttons">
+                    <button class="tab active" onclick="showSignIn()">Sign In</button>
+                    <button class="tab" onclick="showSignUp()">Sign Up</button>
+                </div>
+                
+                <div id="alertContainer"></div>
+                
+                <!-- Sign In Form -->
+                <div id="signInSection" class="form-section active">
+                    <form onsubmit="signIn(event)">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-input" id="signInUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-input" id="signInPassword" required>
+                        </div>
+                        <button type="submit" class="btn">Sign In & Start Chatting 🚀</button>
+                    </form>
+                </div>
+                
+                <!-- Sign Up Form -->
+                <div id="signUpSection" class="form-section">
+                    <form onsubmit="signUp(event)">
+                        <div class="form-group">
+                            <label>Your Name</label>
+                            <input type="text" class="form-input" id="signUpName" placeholder="What should we call you?" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-input" id="signUpUsername" placeholder="Choose a username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-input" id="signUpPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" class="form-input" id="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn">Create Account & Start Chatting 🌿</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Chat Section -->
+            <div id="chatSection" class="chat-container">
+                <div class="welcome">
+                    <h2>Chat with Stonyz Bot 🤖</h2>
+                    <p>Chatting with <span id="currentUserName"></span> | <a href="#" onclick="logout()" style="color: #059669;">Logout</a></p>
+                </div>
+                
+                <div class="feature-buttons">
+                    <button class="feature-btn joke-btn" onclick="tellJoke()">😂 Joke</button>
+                    <button class="feature-btn horoscope-btn" onclick="getHoroscope()">🔮 Horoscope</button>
+                    <button class="feature-btn vibe-btn" onclick="vibeCheck()">✨ Vibe</button>
+                </div>
+                
+                <div class="messages" id="messages"></div>
+                
+                <div class="input-area">
+                    <input type="text" class="message-input" id="messageInput" placeholder="What's on your mind?" onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()">🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let users = [];
+        
+        // Bot responses
+        const jokes = [
+            "Why don't stoners ever win at hide and seek? Because they always get the munchies and have to come out for snacks! 🍕😂",
+            "What do you call a stoner's favorite day? Weedsday! 😂",
+            "What do you call a dinosaur that loves to chill? A dope-a-saurus! 🦕😂"
+        ];
+        
+        const horoscopes = [
+            "The stars are aligning perfectly for you today! ✨ Your chill energy is attracting good vibes.",
+            "Today's a great day to trust your instincts and go with the flow! 🌊",
+            "The universe is sending you peaceful energy today. Perfect time to relax and enjoy! 🌟"
+        ];
+        
+        const vibes = [
+            "Your vibe is absolutely immaculate today! ✨ Perfect energy for exploring new horizons!",
+            "I'm sensing some serious chill energy from you! 🌊 That's exactly the vibe we're here for!",
+            "Your aura is glowing today! 🌟 Time to embrace whatever the universe has in store!"
+        ];
+
+        // Tab switching functions
+        function showSignIn() {
+            document.getElementById('signInSection').classList.add('active');
+            document.getElementById('signUpSection').classList.remove('active');
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.querySelectorAll('.tab')[1].classList.remove('active');
+            clearAlert();
+        }
+        
+        function showSignUp() {
+            document.getElementById('signUpSection').classList.add('active');
+            document.getElementById('signInSection').classList.remove('active');
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.querySelectorAll('.tab')[0].classList.remove('active');
+            clearAlert();
+        }
+
+        // Alert functions
+        function showAlert(message, type = 'error') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert ${type}">${message}</div>`;
+        }
+
+        function clearAlert() {
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        // Authentication functions
+        function signUp(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('signUpName').value.trim();
+            const username = document.getElementById('signUpUsername').value.trim();
+            const password = document.getElementById('signUpPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!name || !username || !password) {
+                showAlert('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAlert('Password must be at least 6 characters');
+                return;
+            }
+            
+            if (users.find(user => user.username === username)) {
+                showAlert('Username already exists');
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                username: username,
+                password: password
+            };
+            
+            users.push(newUser);
+            currentUser = newUser;
+            
+            showChatInterface();
+        }
+
+        function signIn(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('signInUsername').value.trim();
+            const password = document.getElementById('signInPassword').value;
+            
+            if (!username || !password) {
+                showAlert('Please enter username and password');
+                return;
+            }
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (!user) {
+                showAlert('Invalid username or password');
+                return;
+            }
+            
+            currentUser = user;
+            showChatInterface();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('chatSection').classList.remove('active');
+            document.getElementById('signInUsername').value = '';
+            document.getElementById('signInPassword').value = '';
+            clearAlert();
+        }
+
+        function showChatInterface() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('chatSection').classList.add('active');
+            document.getElementById('currentUserName').textContent = currentUser.name;
+            
+            // Clear messages and add welcome message
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            addMessage(`Hey ${currentUser.name}! 🌿 Welcome to Stonyz.ai! I'm here to chat, tell jokes, share horoscopes, and give you good vibes. What's on your mind today?`, 'bot');
+        }
+
+        // Chat functions
+        function addMessage(text, sender) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Bot response
+            setTimeout(() => {
+                const response = generateResponse(message);
+                addMessage(response, 'bot');
+            }, 500);
+        }
+
+        function generateResponse(message) {
+            const input = message.toLowerCase();
+            const userName = currentUser.name;
+            
+            if (input.includes('hi') || input.includes('hello') || input.includes('hey')) {
+                return `Hey there, ${userName}! 🌿 What's bringing you to the good vibes today?`;
+            } else if (input.includes('product') || input.includes('buy') || input.includes('shop')) {
+                return `Dude, ${userName}, we've got some absolutely righteous products! 🔥 Everything from premium CBD to the dopest apparel!`;
+            } else {
+                return `That's totally cool, ${userName}! Tell me more about what you're looking for and I'll point you in the right direction! 🌿`;
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Feature functions
+        function tellJoke() {
+            const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+            addMessage(randomJoke, 'bot');
+        }
+
+        function getHoroscope() {
+            const randomHoroscope = horoscopes[Math.floor(Math.random() * horoscopes.length)];
+            addMessage(`${currentUser.name}, here's your cosmic reading: ${randomHoroscope}`, 'bot');
+        }
+
+        function vibeCheck() {
+            const randomVibe = vibes[Math.floor(Math.random() * vibes.length)];
+            addMessage(randomVibe.replace('Your', `${currentUser.name}, your`), 'bot');
+        }
+
+        // Initialize
+        console.log('🌿 Stonyz.ai loaded successfully!');
+    </script>
+</body>
+</html>
